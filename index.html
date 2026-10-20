@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mon Français">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#eceff3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1620" media="(prefers-color-scheme: dark)">
+<meta name="description" content="A phone-sized French learning app: 12-week plan, spaced-repetition cards, listening and speaking practice, and a daily love phrase.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23123a63'/%3E%3Ctext x='32' y='42' font-size='30' font-style='italic' font-family='Georgia,serif' text-anchor='middle' fill='white'%3EFr%3C/text%3E%3C/svg%3E">
+<title>Mon Français</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono&display=swap" rel="stylesheet">
+<style>
+/* Layout: one narrow column like a phone app; bottom tab bar; enamel-blue street-sign navy with a rose accent kept for the love track. */
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);--bg:#eceff3;--card:#ffffff;--ink:#14202e;--mut:#566577;--line:#d3dae3;--acc:#123a63;--on-acc:#ffffff;--rose:#b82a55;--on-rose:#ffffff;--rose-bg:#f8e3ea;--ok:#1d7a52;--soft:#e1e8f0;--serif:"Instrument Serif",Georgia,"Times New Roman",serif;--sans:"Hanken Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"DM Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1620;--card:#15212e;--ink:#e8eef5;--mut:#95a5b7;--line:#263749;--acc:#86b8ea;--on-acc:#0d1620;--rose:#f27e9e;--on-rose:#2a0f1a;--rose-bg:#3a202c;--ok:#62d0a1;--soft:#1c2c3d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1620;--card:#15212e;--ink:#e8eef5;--mut:#95a5b7;--line:#263749;--acc:#86b8ea;--on-acc:#0d1620;--rose:#f27e9e;--on-rose:#2a0f1a;--rose-bg:#3a202c;--ok:#62d0a1;--soft:#1c2c3d;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.app{max-width:560px;margin:0 auto;padding-block:14px 120px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+h1{font:400 34px/1 var(--serif);margin:0;letter-spacing:-.01em}
+.stats{display:flex;gap:16px}
+.stat{text-align:right}.stat b{display:block;font:600 18px/1.1 var(--sans);font-variant-numeric:tabular-nums}.stat span{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+h2{font:400 28px/1.1 var(--serif);margin:0}
+h3{font:600 12px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:24px 0 6px}
+p{margin:0 0 10px;text-wrap:pretty}
+.eyebrow{font:600 12px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:6px 0 10px}
+.date{color:var(--mut);font-size:14px;white-space:nowrap}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:0 0 6px}.bar i{display:block;height:100%;background:var(--ok);border-radius:3px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.love{background:var(--rose-bg);border-radius:14px;padding:16px;margin:16px 0}
+.love .eyebrow{color:var(--rose)}
+.fr{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1.25;overflow-wrap:anywhere}
+.fr.big{font-size:30px;margin:8px 0}
+.en{color:var(--mut)}
+.pron{font:14px/1.4 var(--mono);color:var(--rose);margin:2px 0 8px}
+.rv{cursor:pointer;color:var(--mut);border-radius:6px;display:inline-block;padding:0 4px;margin-left:-4px}
+.rv.hide{color:transparent;background:var(--line);user-select:none;-webkit-user-select:none}
+.btn{appearance:none;-webkit-appearance:none;border:1.5px solid var(--acc);background:var(--acc);color:var(--on-acc);font:600 15px/1 var(--sans);padding:12px 16px;border-radius:10px;min-height:44px;cursor:pointer;touch-action:manipulation}
+.btn.ghost{background:transparent;color:var(--acc)}
+.btn.sm{min-height:36px;padding:8px 12px;font-size:14px}
+.btn.love{background:var(--rose);border-color:var(--rose);color:var(--on-rose)}
+.btn.love.ghost{background:transparent;color:var(--rose)}
+.btn:focus-visible,.tab:focus-visible,.play:focus-visible,.seg button:focus-visible,.rv:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.seg{display:flex;background:var(--soft);border-radius:11px;padding:3px;gap:2px;margin:6px 0 12px}
+.seg button{flex:1;appearance:none;border:0;background:transparent;color:var(--mut);font:600 14px/1 var(--sans);padding:10px 4px;border-radius:9px;min-height:40px;cursor:pointer}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.task{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.task input{width:22px;height:22px;margin:1px 0 0;accent-color:var(--ok);flex:none}
+.task span{min-width:0}
+.task.on span{color:var(--mut);text-decoration:line-through}
+.w{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.w .grow{flex:1;min-width:0}
+.w .rv{flex:none;max-width:45%;text-align:right;overflow-wrap:anywhere}
+.play{flex:none;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--acc);background:transparent;color:var(--acc);display:grid;place-items:center;cursor:pointer;padding:0}
+.play svg{width:16px;height:16px;fill:currentColor}
+.nav{display:flex;justify-content:space-between;gap:8px;margin-top:18px}
+textarea,input[type=text],input[type=date],select{width:100%;font:16px/1.4 var(--sans);background:var(--card);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+textarea{min-height:84px;resize:vertical}
+input[type=text]{margin:12px 0 4px}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--rose);font-weight:600}
+.note{background:var(--soft);border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px}
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);z-index:5;padding:4px max(8px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.tabin{max-width:560px;margin:0 auto;display:flex}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:var(--mut);font:600 11px/1.2 var(--sans);padding:6px 0;min-height:50px;cursor:pointer}
+.tab.on{color:var(--acc)}.tab.on.lv{color:var(--rose)}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.badge{background:var(--rose);color:var(--on-rose);border-radius:9px;font-size:10px;padding:0 5px;margin-left:3px;font-weight:700}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:20px;font-size:14px;z-index:9}
+.phase{padding:12px 0;border-top:1px solid var(--line)}
+.phase b{font-weight:600}
+.phase.now{background:var(--soft);margin:0 -10px;padding:12px 10px;border-radius:10px;border-top-color:transparent}
+.lvl{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--rose);margin-left:6px}
+.sub{font-size:13px;color:var(--mut)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi b{display:block;font:400 30px/1 var(--serif)}.kpi span{font-size:12px;color:var(--mut)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><h1>Mon Français</h1><div class="stats"><div class="stat"><b id="sDay">1</b><span>Day</span></div><div class="stat"><b id="sStreak">0</b><span>Streak</span></div></div></div>
+<div id="view"></div>
+</div>
+<div class="tabs"><div class="tabin" id="tabs"></div></div>
+<div class="toast" id="toast" hidden></div>
+<script>
+(function(){
+"use strict";
+var D=[
+["bonjour|hello;salut|hi;merci|thank you;s'il te plaît|please;ça va ?|how are you?","Tu es magnifique.|You look gorgeous.|tü eh man-yee-FEEK"],
+["un|one;deux|two;trois|three;quatre|four;cinq|five","Tu me manques.|I miss you.|tü muh MAHK"],
+["je suis|I am;tu es|you are;il/elle est|he/she is;oui|yes;non|no","Je pense à toi.|I'm thinking of you.|zhuh PAHNS ah TWAH"],
+["mère|mother;père|father;frère|brother;sœur|sister;ami(e)|friend","Tu as un sourire adorable.|You have an adorable smile.|tü ah uhn soo-REER ah-doh-RAHBL"],
+["je|I;tu|you;nous|we;vous|you (formal/plural);ils/elles|they","Bonne nuit, mon amour.|Good night, my love.|bun NWEE, mohn ah-MOOR"],
+["six|six;sept|seven;huit|eight;neuf|nine;dix|ten","Je t'aime.|I love you.|zhuh TEM"],
+["ça va|it's going well;très bien|very well;comme ci comme ça|so-so;à bientôt|see you soon;au revoir|goodbye","Tu me rends heureux.|You make me happy.|tü muh RAHN uh-RUH"],
+["café|coffee;pain|bread;eau|water;vin|wine;fromage|cheese","Tu as de beaux yeux.|You have beautiful eyes.|tü ah duh BOH zyuh"],
+["j'ai|I have;tu as|you have;faim|hunger;soif|thirst;envie de|desire for","J'ai envie de toi.|I want you.|zhay ahn-VEE duh TWAH"],
+["manger|to eat;boire|to drink;parler|to speak;aimer|to love/like;cuisiner|to cook","Je veux t'embrasser.|I want to kiss you.|zhuh vuh tahm-brah-SAY"],
+["le|the (m);la|the (f);les|the (pl);un|a (m);une|a (f)","Embrasse-moi.|Kiss me.|ahm-BRASS mwah"],
+["lundi|Monday;mardi|Tuesday;mercredi|Wednesday;jeudi|Thursday;vendredi|Friday","Ce soir, c'est nous deux.|Tonight it's just the two of us.|suh SWAR, seh noo DUH"],
+["samedi|Saturday;dimanche|Sunday;aujourd'hui|today;demain|tomorrow;hier|yesterday","Tu es tellement sexy.|You're so sexy.|tü eh tel-mahn SEK-see"],
+["je voudrais|I would like;un café|a coffee;l'addition|the bill;délicieux|delicious;santé !|cheers!","Tu me mets l'eau à la bouche.|You make my mouth water.|tü muh meh loh ah lah BOOSH"],
+["ville|city;gare|station;rue|street;maison|house;chez moi|my place","Viens chez moi.|Come to my place.|vyan shay MWAH"],
+["où|where;quand|when;pourquoi|why;comment|how;combien|how much","Tu veux rester cette nuit ?|Do you want to stay tonight?|tü vuh res-TAY set NWEE"],
+["heure|hour;matin|morning;soir|evening;nuit|night;maintenant|now","Je ne veux pas dormir sans toi.|I don't want to sleep without you.|zhuh nuh vuh pah dor-MEER sahn TWAH"],
+["ne...pas|not;jamais|never;toujours|always;encore|again/more;peut-être|maybe","Ne t'arrête pas.|Don't stop.|nuh tah-RET pah"],
+["gauche|left;droite|right;tout droit|straight ahead;près|near;loin|far","Je suis loin de toi, et ça me rend fou.|I'm far from you and it drives me crazy.|zhuh swee LWAN duh TWAH, ay sah muh rahn FOO"],
+["chaud|hot;froid|cold;doux|soft/gentle;fort|strong;lent|slow","Tu me donnes chaud.|You make me hot.|tü muh DUN SHOH"],
+["doucement|gently;encore|more;là|there;tout près|very close;juste|just","Doucement... j'aime ça.|Gently... I like that.|doos-MAHN... zhem SAH"],
+["bonjour|hello;merci|thank you;je suis|I am;tu es|you are;s'il te plaît|please","Tu me rends fou.|You drive me crazy.|tü muh rahn FOO"],
+["un|one;cinq|five;dix|ten;mère|mother;frère|brother","J'ai très envie de toi ce soir.|I want you so much tonight.|zhay treh ahn-VEE duh twah suh SWAR"],
+["j'ai faim|I'm hungry;café|coffee;eau|water;je voudrais|I would like;manger|to eat","Reste avec moi jusqu'au matin.|Stay with me until morning.|rest ah-VEK mwah zhoos-KOH mah-TAN"],
+["gare|station;où est|where is;gauche|left;droite|right;maintenant|now","Viens là, tout près de moi.|Come here, right next to me.|vyan LAH, too preh duh MWAH"],
+["toujours|always;jamais|never;peut-être|maybe;demain|tomorrow;ce soir|tonight","Tu es à moi, et je suis à toi.|You're mine and I'm yours.|tü eh ah MWAH, ay zhuh swee ah TWAH"],
+["bonjour|hello;ça va ?|how are you?;je voudrais|I would like;où est|where is;je ne comprends pas|I don't understand","Dis-moi ce que tu veux.|Tell me what you want.|dee MWAH suh kuh tü VUH"],
+["tout|everything;ensemble|together;moi|me;toi|you;nous|us","Je t'aime, et j'ai hâte de te retrouver.|I love you and can't wait to see you again.|zhuh TEM, ay zhay AHT duh tuh ruh-troo-VAY"]
+];
+var LES=[
+{t:"Sounds and greetings",n:"Être (to be): je suis, tu es, il/elle est. Nouns have a gender, so learn le or la with each one. The French r is made in the throat, u is 'ee' with rounded lips, and final consonants are usually silent.",d:["Bonjour ! Ça va ?|Hello! How are you?","Ça va bien, merci. Et toi ?|Well, thanks. And you?","Très bien. Je suis Alex.|Very well. I'm Alex.","Enchantée. Je suis Léa.|Nice to meet you. I'm Léa."]},
+{t:"Food and cafés",n:"Avoir (to have): j'ai, tu as, il a. Regular -er verbs drop -er and add e, es, e, ons, ez, ent (je mange, tu manges). Say 'Je voudrais...' to order politely.",d:["Bonjour, je voudrais un café.|Hello, I'd like a coffee.","Avec du lait ?|With milk?","Oui, s'il vous plaît.|Yes, please.","Voilà. Ça fait deux euros.|Here you go. That's two euros."]},
+{t:"Places and time",n:"Negation wraps the verb: je ne parle pas. For questions, raise your voice or start with est-ce que. Time: il est huit heures.",d:["Excusez-moi, où est la gare ?|Excuse me, where is the station?","Tout droit, puis à gauche.|Straight ahead, then left.","C'est loin ?|Is it far?","Non, c'est tout près.|No, it's very close."]},
+{t:"Review and checkpoint",n:"Review week. Cover the English, say each phrase aloud, then check. Redo any cards you marked Again, and do two Listen and type rounds before the checkpoint.",d:["Tu me manques.|I miss you.","Moi aussi, je pense à toi.|Me too, I think of you.","Je voudrais te voir ce soir.|I'd like to see you tonight.","Viens chez moi.|Come to my place."]}
+];
+var W=[
+{t:"Daily routine",n:"aller (to go): je vais, tu vas, il va, nous allons, vous allez, ils vont. Aller plus an infinitive is the near future: je vais manger. faire (to do, make): je fais, tu fais, il fait, nous faisons.",
+d:["Qu'est-ce que tu fais ce soir ?|What are you doing tonight?","Je vais cuisiner, et toi ?|I'm going to cook, and you?","Je vais rentrer tôt.|I'm going to get home early.","Alors je viens chez toi.|Then I'll come to your place."],
+w:"se lever|to get up;la douche|the shower;le petit déjeuner|breakfast;travailler|to work;rentrer|to go home;dormir|to sleep;le lit|the bed;tôt|early;tard|late;souvent|often;parfois|sometimes;la journée|the day;le week-end|the weekend;se coucher|to go to bed",
+p:["Je vais penser à toi toute la journée.|I'm going to think about you all day.","Je préfère rester au lit avec toi.|I'd rather stay in bed with you.","Qu'est-ce que tu fais ce soir ?|What are you doing tonight?","Je vais te préparer le petit déjeuner.|I'm going to make you breakfast.","Tu es belle, même le matin.|You're beautiful, even in the morning.","Je vais rentrer tôt, juste pour toi.|I'm going to get home early, just for you.","Ce soir, on ne fait rien de sage.|Tonight we won't do anything sensible."]},
+{t:"Work and hobbies",n:"Possessives agree with the noun, not the owner: mon travail, ma copine, mes amis. Use mon before a vowel even for feminine nouns: mon amie. Handy prepositions: à (at, to), de (of, from), dans (in), sur (on), avec (with).",
+d:["Tu travailles où ?|Where do you work?","Je travaille dans un bureau en ville. Et toi ?|I work in an office in the city. And you?","Moi, je travaille dans une école.|I work in a school.","Qu'est-ce que tu aimes faire le week-end ?|What do you like to do at the weekend?"],
+w:"le travail|work;le bureau|the office;un collègue|a colleague;la réunion|the meeting;un loisir|a hobby;la musique|music;le film|the film;le sport|sport;courir|to run;lire|to read;voyager|to travel;mon, ma, mes|my;ton, ta, tes|your;avec|with",
+p:["Tu es ma personne préférée.|You're my favourite person.","Mon travail est long, mais tu me donnes de l'énergie.|My work is long, but you give me energy.","J'adore ta voix.|I love your voice.","Je pense à toi pendant ma réunion.|I think of you during my meeting.","Tu es dans ma tête.|You're in my head.","Je veux passer le week-end avec toi.|I want to spend the weekend with you.","Ce week-end, on reste au lit.|This weekend, we're staying in bed."]},
+{t:"Feelings and compliments",n:"Adjectives agree with the person: heureux/heureuse, content/contente, gentil/gentille. -ir verbs: je finis, tu finis, il finit. -re verbs: j'attends, tu attends, il attend.",
+d:["Tu as l'air fatiguée.|You look tired.","Un peu, mais je suis contente de te voir.|A bit, but I'm happy to see you.","Tu es très jolie ce soir.|You're very pretty tonight.","Tu es gentil. Tu veux quelque chose ?|You're kind. Do you want something?"],
+w:"heureux, heureuse|happy;triste|sad;fatigué(e)|tired;amoureux, amoureuse|in love;content(e)|pleased;joli(e)|pretty;beau, belle|handsome, beautiful;drôle|funny;gentil(le)|kind;choisir|to choose;finir|to finish;attendre|to wait;répondre|to answer;sentir|to feel, to smell",
+p:["Je suis amoureux de toi.|I'm in love with you.","Tu es la plus belle.|You're the most beautiful.","Tu es drôle, gentille et incroyablement sexy.|You're funny, kind and incredibly sexy.","J'attends ce soir avec impatience.|I'm looking forward to tonight.","Tu sens tellement bon.|You smell so good.","Je ne peux pas finir ma journée sans penser à toi.|I can't finish my day without thinking of you.","Tu es magnifique, et tu le sais.|You're gorgeous, and you know it."]},
+{t:"Home and review",n:"Review week. Redo your Again cards, then build sentences with il y a (there is) and prepositions: il y a une bougie sur la table. Say each sentence aloud before you check it.",
+d:["Tu veux voir ma chambre ?|Do you want to see my bedroom?","Il y a une bougie sur la table.|There's a candle on the table.","Tu peux éteindre la lumière ?|Can you turn off the light?","Avec plaisir.|With pleasure."],
+w:"la chambre|the bedroom;la cuisine|the kitchen;le salon|the living room;la salle de bain|the bathroom;le canapé|the sofa;la fenêtre|the window;la porte|the door;la lumière|the light;la bougie|the candle;le drap|the sheet;l'oreiller|the pillow;la couverture|the blanket;fermer|to close;éteindre|to switch off",
+p:["Allume une bougie, éteins la lumière.|Light a candle, turn off the light.","Viens sur le canapé, près de moi.|Come on the sofa, next to me.","Je veux dormir dans tes bras.|I want to sleep in your arms.","L'oreiller sent ton parfum.|The pillow smells of your perfume.","Ferme la porte, on est seuls.|Close the door, we're alone.","Dans la chambre, je ne pense qu'à toi.|In the bedroom, I think only of you.","Cette nuit, personne ne nous dérange.|Tonight, nobody disturbs us."]},
+{t:"The past, part 1",n:"Passé composé with avoir: j'ai + past participle. -er verbs end in é: j'ai mangé, tu as regardé. Common irregulars: j'ai vu (voir), j'ai pris (prendre), j'ai eu (avoir), j'ai fait (faire). Negative: je n'ai pas mangé.",
+d:["Qu'est-ce que tu as fait hier soir ?|What did you do last night?","J'ai regardé un film, et toi ?|I watched a film, and you?","J'ai pensé à toi toute la soirée.|I thought of you all evening.","Moi aussi, j'ai pris ton oreiller.|Me too, I took your pillow."],
+w:"le voyage|the trip;l'avion|the plane;le train|the train;la plage|the beach;l'hôtel|the hotel;la valise|the suitcase;visiter|to visit;regarder|to watch;acheter|to buy;voir|to see;prendre|to take;hier soir|last night;la semaine dernière|last week;déjà|already",
+p:["J'ai rêvé de toi cette nuit.|I dreamed of you last night.","Hier soir, j'ai pensé à toi.|Last night I thought of you.","J'ai vu ta photo et j'ai souri.|I saw your photo and I smiled.","J'ai pris le train pour te voir.|I took the train to see you.","J'ai déjà envie de te revoir.|I already want to see you again.","Je n'ai pas arrêté de penser à ton sourire.|I haven't stopped thinking about your smile.","J'ai gardé ton pull, il sent ton parfum.|I kept your jumper, it smells of your perfume."]},
+{t:"Shopping, body, and être",n:"Passé composé with être: a small group of verbs of movement and change use être: je suis allé(e), venu(e), arrivé(e), parti(e), resté(e), rentré(e). The participle agrees with the subject: il est allé, elle est allée.",
+d:["Tu es allée au magasin ?|Did you go to the shop?","Oui, je suis arrivée tôt et j'ai acheté un cadeau.|Yes, I arrived early and bought a gift.","C'est pour qui ?|Who is it for?","C'est pour toi. Il sent très bon.|It's for you. It smells very good."],
+w:"le magasin|the shop;le prix|the price;cher|expensive;un cadeau|a gift;le parfum|perfume;la robe|the dress;la tête|the head;la main|the hand;le cou|the neck;les lèvres|the lips;la peau|the skin;le cœur|the heart;les cheveux|the hair;le dos|the back",
+p:["Je suis venu pour toi.|I came for you.","Je suis arrivé, ouvre-moi la porte.|I've arrived, open the door for me.","Tu as de belles mains.|You have beautiful hands.","J'ai envie d'embrasser ton cou.|I want to kiss your neck.","Ta peau est tellement douce.|Your skin is so soft.","J'adore tes cheveux entre mes doigts.|I love your hair between my fingers.","Je suis resté éveillé en pensant à tes lèvres.|I stayed awake thinking of your lips."]},
+{t:"Reflexive verbs and tu/vous",n:"Reflexive verbs use me, te, se, nous, vous, se: je me lave, tu te laves, il se lave. In the passé composé they use être: je me suis levé. Use tu with friends and your girlfriend, and vous with strangers, older people and formal situations. With a Parisian you have just met, start with vous.",
+d:["Excusez-moi, vous vous appelez comment ?|Excuse me, what's your name?","Je m'appelle Camille. On peut se tutoyer.|I'm Camille. We can use tu with each other.","Avec plaisir. Tu te lèves tôt ?|Gladly. Do you get up early?","Oui, je me lève à six heures.|Yes, I get up at six."],
+w:"se réveiller|to wake up;se laver|to wash;s'habiller|to get dressed;se déshabiller|to get undressed;se retrouver|to meet up;s'embrasser|to kiss each other;se rencontrer|to meet;s'aimer|to love each other;se reposer|to rest;se promener|to go for a walk;se parler|to talk to each other;se détendre|to relax;tutoyer|to use tu;vouvoyer|to use vous",
+p:["On se retrouve ce soir ?|Shall we meet up tonight?","Je me réveille avec ton nom en tête.|I wake up with your name in my head.","On s'embrasse ?|Shall we kiss?","Je veux me réveiller à côté de toi.|I want to wake up next to you.","Détends-toi, laisse-moi faire.|Relax, let me take care of it.","On s'aime, on se désire, on se le dit.|We love each other, we want each other, we say so.","Tu te déshabilles pour moi ?|Will you undress for me?"]},
+{t:"Review and checkpoint",n:"Checkpoint week. Redo your Again cards, reread the notes on être and avoir, the passé composé and reflexive verbs, then take the Month 3 checkpoint on Day 84: a 15-minute French-only conversation with your girlfriend and a 2-minute voice note to compare with Day 1.",
+d:["Je t'ai préparé une surprise.|I've prepared a surprise for you.","Vraiment ? Raconte-moi tout.|Really? Tell me everything.","Non, c'est un secret. Viens avec moi.|No, it's a secret. Come with me.","Je te suis partout.|I'd follow you anywhere."],
+w:"un baiser|a kiss;un câlin|a cuddle;un rêve|a dream;un secret|a secret;une surprise|a surprise;une promesse|a promise;un souvenir|a memory;l'envie|desire;le désir|desire;la tendresse|tenderness;la tentation|temptation;ensemble|together;seul|alone;pour toujours|forever",
+p:["Tu es mon plus beau souvenir.|You're my best memory.","Je t'ai promis une surprise.|I promised you a surprise.","Un baiser, juste un.|One kiss, just one.","J'ai envie d'un câlin... et de plus.|I want a cuddle... and more.","La tentation, c'est toi.|Temptation is you.","Ce désir ne me quitte pas.|This desire doesn't leave me.","Je suis à toi, pour toujours.|I'm yours, forever."]}
+];
+var PH=[
+{n:"1. Foundations",m:"Months 1 to 3",l:"A1 to A2, 1,000 words",g:"Introduce yourself, order food, chat for 5 minutes",app:true},
+{n:"2. Building",m:"Months 4 to 8",l:"A2 to B1-, 2,500 words",g:"Tell a weekend story, read fairy tales aloud"},
+{n:"3. Narrative French",m:"Months 9 to 14",l:"B1, 4,000 words",g:"20-minute chats, short stories, natural-speed podcasts"},
+{n:"4. Real speech",m:"Months 15 to 21",l:"B1+ to B2-, 6,000 words",g:"Parisian slang, Monte Cristo in English, then 10 French chapters"},
+{n:"5. Monte Cristo",m:"Months 22 to 30",l:"B2, 8,000+ words",g:"The full novel, read aloud and discussed with a native speaker"}];
+var CP=[
+{id:"m3",m:3,t:"2-minute voice sample and a 5-minute chat",p:"Introduce yourself and order food without English"},
+{id:"m8",m:8,t:"Tell a weekend story in the past tense; read a fairy tale aloud",p:"Mostly understood, errors allowed"},
+{id:"m14",m:14,t:"Follow a 10-minute podcast; read a short story aloud",p:"Main points caught, few lookups"},
+{id:"m21",m:21,t:"Read one original chapter with the English closed; chat for 20 minutes with a Paris-based speaker",p:"5 to 8 lookups per page"},
+{id:"m30",m:30,t:"Finish the book; read a chapter aloud; discuss it for 30 minutes",p:"Smooth reading, conversation held in French"}];
+var CPT={27:"Checkpoint 1: record a 2-minute voice note (name, family, likes, a café order), then do two Listen and type rounds",55:"Checkpoint 2: tell your weekend story aloud for 2 minutes, then score two Listen and type rounds",83:"Checkpoint 3: a 15-minute French-only conversation with your girlfriend, then a 2-minute voice note to compare with Day 1"};
+var GOAL={f:"Le 24 février 1815, la vigie de Notre-Dame de la Garde signala le trois-mâts le Pharaon, venant de Smyrne, Trieste et Naples.",e:"On 24 February 1815, the lookout at Notre-Dame de la Garde signalled the three-master Pharaon, coming from Smyrna, Trieste and Naples.",g:["la vigie|the lookout","signala|signalled (passé simple)","le trois-mâts|the three-masted ship","venant de|coming from"]};
+var N=84,KEY="monfrancais.v1",IV=[1,2,4,8,16,32,64];
+
+/* ---------- state ---------- */
+function def(){return {v:1,t:0,start:null,done:{},srs:{},cp:{},notes:{},rate:.9,voice:"",cm:"en",aloud:{},lt:[],tr:[],hint:0}}
+var S=def(),STATUS="local";
+try{var raw=localStorage.getItem(KEY);if(raw)S=Object.assign(def(),JSON.parse(raw))}catch(e){}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function pd(s){var a=s.split("-");return new Date(+a[0],+a[1]-1,+a[2])}
+if(!S.start){S.start=iso(new Date());try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+var REM=null,saving=false,again=false,tmr=null;
+function persist(){S.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(REM){clearTimeout(tmr);tmr=setTimeout(push,700)}}
+function push(){if(!REM)return;if(saving){again=true;return}saving=true;REM.set({s:JSON.stringify(S)}).then(function(){STATUS="cloud"},function(){STATUS="local"}).then(function(){saving=false;if(again){again=false;push()}})}
+
+function registerSW(){try{if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0)navigator.serviceWorker.register("sw.js").catch(function(){})}catch(e){}
+try{var cv=document.createElement("canvas");cv.width=cv.height=180;var g=cv.getContext("2d");g.fillStyle="#123a63";g.fillRect(0,0,180,180);g.fillStyle="#ffffff";g.font="italic 104px Georgia,serif";g.textAlign="center";g.textBaseline="middle";g.fillText("Fr",90,92);g.fillStyle="#f27e9e";g.fillRect(48,138,84,8);var l=document.createElement("link");l.rel="apple-touch-icon";l.href=cv.toDataURL("image/png");document.head.appendChild(l)}catch(e){}}
+/* ---------- dates and content ---------- */
+function dayNum(){var a=pd(S.start),b=new Date();b=new Date(b.getFullYear(),b.getMonth(),b.getDate());return Math.round((b-a)/864e5)}
+function curDay(){return Math.max(0,Math.min(N-1,dayNum()))}
+function dateOf(i){var a=pd(S.start);return new Date(a.getFullYear(),a.getMonth(),a.getDate()+i)}
+function fmt(d){return d.toLocaleDateString("en-AU",{weekday:"short",day:"numeric",month:"short"})}
+function dnum(){return Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5)}
+function sp(x){return x.split("|")}
+function dayData(i){var w=Math.floor(i/7);if(i<28){var d=D[i];return {w:w,words:d[0].split(";").map(sp),phrase:sp(d[1]),les:LES[w]}}var k=W[w-4],j=i%7;return {w:w,words:k.w.split(";").slice(j*2,j*2+2).map(sp),phrase:sp(k.p[j]),les:{t:k.t,n:k.n,d:k.d}}}
+function lvl(w){return w<2?"Sweet":w<5?"Flirty":w<9?"Sensual":"Intimate"}
+var DK=null,DKd=-1;
+function deck(){var cd=curDay();if(DK&&DKd===cd)return DK;var seen={},a=[];function add(x,k){if(seen[x[0]])return;seen[x[0]]=1;a.push({f:x[0],e:x[1],p:x[2]||"",k:k})}for(var i=0;i<=cd;i++){var d=dayData(i);d.words.forEach(function(x){add(x,"w")});add(d.phrase,"p")}DK=a;DKd=cd;return a}
+function tasks(i){var wd=dateOf(i).getDay(),t;
+if(wd>=1&&wd<=4)t=[{k:"cards",t:"Cards, 10 min: clear your due cards"},{k:"lesson",t:"Lesson, 10 min: read the note and say the dialogue"},{k:"listen",t:"Practice, 10 min: one Listen and type round"},{k:"aloud",t:"Read aloud, 10 min: today's phrase and dialogue"}];
+else if(wd==5)t=[{k:"cards",t:"Light day, 5 min: clear your cards, then say today's phrase aloud"}];
+else if(wd==6)t=[{k:"say",t:"Say today's phrase to her, or text it, in French"},{k:"trans",t:"Practice: one Translate round"},{k:"write",t:"Write 3 sentences in French about your week"}];
+else t=[{k:"cards",t:"Review the week in Cards, 15 min"},{k:"aloud",t:"Read aloud: this week's dialogue, 10 min"},{k:"win",t:"Write one new thing you said this week (below)"}];
+if(CPT[i])t.push({k:"cp",t:CPT[i]});return t}
+function cnt(i){var s=S.done[i]||{};return tasks(i).filter(function(t){return s[t.k]}).length}
+function streak(){var cd=curDay(),i=cd,k=0;if(dayNum()<0)return 0;if(cnt(cd)==0)i=cd-1;for(;i>=0&&cnt(i)>0;i--)k++;return k}
+function auto(k){var i=curDay();if(dayNum()<0)return;if(tasks(i).some(function(t){return t.k===k})){S.done[i]=S.done[i]||{};if(!S.done[i][k]){S.done[i][k]=1;persist()}}}
+function dueCount(){var n=dnum(),c=0;deck().forEach(function(x){var r=S.srs[x.f];if(r&&r.d<=n)c++});var nw=deck().filter(function(x){return !S.srs[x.f]}).length;return c+Math.min(nw,10)}
+function dueList(){var n=dnum(),o=[],w=[];deck().forEach(function(c){var r=S.srs[c.f];if(!r)w.push(c);else if(r.d<=n)o.push(c)});return shuf(o).concat(w.slice(0,10))}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function nm(z){return z.toLowerCase().replace(/\(e\)/g,"").replace(/œ/g,"oe").replace(/æ/g,"ae").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[\/]/g," ").replace(/\.{3}/g," ").replace(/[^a-z0-9 ]/g,"").replace(/\s+/g," ").trim()}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+/* ---------- speech ---------- */
+var VO=[];function loadV(){try{VO=speechSynthesis.getVoices().filter(function(v){return /^fr/i.test(v.lang)})}catch(e){}}
+loadV();try{speechSynthesis.addEventListener("voiceschanged",loadV)}catch(e){}
+function say(t,slow){try{var u=new SpeechSynthesisUtterance(t.replace(/\(e\)/g,"").replace(/\//g,", ").replace(/\.{3}/g," ... "));u.lang="fr-FR";var v=VO.filter(function(x){return x.name===S.voice})[0]||VO.filter(function(x){return /fr[-_]FR/i.test(x.lang)})[0]||VO[0];if(v)u.voice=v;u.rate=slow?.6:S.rate;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}}
+var tt;function toast(m){var e=document.getElementById("toast");e.textContent=m;e.hidden=false;clearTimeout(tt);tt=setTimeout(function(){e.hidden=true},1800)}
+function copy(t){function ok(){toast("Copied")}function fb(){try{var a=document.createElement("textarea");a.value=t;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();document.execCommand("copy");document.body.removeChild(a);ok()}catch(e){toast("Copy blocked. Select the text instead.")}}try{navigator.clipboard.writeText(t).then(ok,fb)}catch(e){fb()}}
+
+/* ---------- view helpers ---------- */
+var V={tab:"today",vd:null,pm:"lt",Q:null,L:null,T:null,show:false,said:{},cr:false,total:0};
+var PLAY='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>';
+function play(t){return '<button class="play" data-a="say" data-t="'+esc(t)+'" aria-label="Hear">'+PLAY+'</button>'}
+function hear(t,c){return '<button class="btn ghost sm '+(c||"")+'" data-a="say" data-t="'+esc(t)+'">Hear</button><button class="btn ghost sm '+(c||"")+'" data-a="slow" data-t="'+esc(t)+'">Slow</button>'}
+function rv(t){return '<span class="rv hide" data-a="rev" tabindex="0" role="button" aria-label="Tap to reveal the English">'+esc(t)+'</span>'}
+function seg(items,cur,act){return '<div class="seg">'+items.map(function(x){return '<button class="'+(cur===x[0]?"on":"")+'" data-a="'+act+'" data-v="'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div>'}
+function bar(p){return '<div class="bar"><i style="width:'+Math.round(p*100)+'%"></i></div>'}
+
+/* ---------- Today ---------- */
+function vToday(){var cd=curDay(),i=V.vd==null?cd:Math.min(V.vd,cd),dd=dayData(i),tk=tasks(i),s=S.done[i]||{},n=cnt(i),h="";
+if(!S.hint)h+='<div class="note"><b>Welcome.</b> Day 1 starts today. Do the checklist, clear your Cards, and say the phrases out loud. On iPhone, tap Share, then Add to Home Screen. Under Settings, Accessibility, Spoken Content, Voices, download a French voice.<div class="btns"><button class="btn sm" data-a="hint">Got it</button></div></div>';
+if(dayNum()<0)h+='<div class="note">Your plan starts on '+fmt(dateOf(0))+'. Showing Day 1.</div>';
+if(dayNum()>=N)h+='<div class="note">You have finished the Phase 1 plan. Cards and Practice keep working. Ask Claude to add Phase 2 to this app.</div>';
+h+='<div class="head"><div><div class="eyebrow">Week '+(dd.w+1)+' of 12 · '+esc(dd.les.t)+'</div><h2>Day '+(i+1)+'</h2></div><div class="date">'+fmt(dateOf(i))+'</div></div>';
+h+=bar(n/tk.length)+'<div class="sub">'+n+' of '+tk.length+' done</div>';
+tk.forEach(function(t){h+='<label class="task '+(s[t.k]?"on":"")+'"><input type="checkbox" data-a="task" data-i="'+i+'" data-k="'+t.k+'"'+(s[t.k]?" checked":"")+'><span>'+esc(t.t)+'</span></label>'});
+var p=dd.phrase;
+h+='<div class="love"><div class="eyebrow">Phrase of the day<span class="lvl">'+lvl(dd.w)+'</span></div><div class="fr big">'+esc(p[0])+'</div>'+(p[2]?'<div class="pron">'+esc(p[2])+'</div>':'')+'<div>'+rv(p[1])+'</div><div class="btns">'+hear(p[0],"love")+'<button class="btn love sm" data-a="copy" data-t="'+esc(p[0])+'">Copy to text her</button></div></div>';
+h+='<h3>Lesson</h3><p>'+esc(dd.les.n)+'</p>';
+dd.les.d.forEach(function(l){var q=sp(l);h+='<div class="w">'+play(q[0])+'<div class="grow"><div class="fr">'+esc(q[0])+'</div></div>'+rv(q[1])+'</div>'});
+h+='<h3>Words for today</h3>';
+dd.words.forEach(function(q){h+='<div class="w">'+play(q[0])+'<div class="grow"><div class="fr">'+esc(q[0])+'</div></div>'+rv(q[1])+'</div>'});
+h+='<p class="sub" style="margin-top:8px">Tap the grey box to reveal the English. Today\'s words join your Cards automatically.</p>';
+if(dateOf(i).getDay()===0)h+='<h3>This week\'s win</h3><textarea id="win" data-i="'+i+'" placeholder="One new thing I said in French this week">'+esc(S.notes["w"+dd.w]||"")+'</textarea>';
+h+='<div class="nav"><button class="btn ghost sm" data-a="prev"'+(i<=0?" disabled":"")+'>Previous day</button>'+(i!==cd?'<button class="btn ghost sm" data-a="todayd">Back to today</button>':'')+'<button class="btn ghost sm" data-a="next"'+(i>=cd?" disabled":"")+'>Next day</button></div>';
+return h}
+
+/* ---------- Cards ---------- */
+function vCards(){if(!V.Q){V.Q=dueList();V.show=false;V.total=V.Q.length}
+var m=S.cm,h=seg([["en","English first"],["fr","French first"],["au","Audio first"]],m,"cm");
+if(!V.Q.length){var kn=Object.keys(S.srs).filter(function(k){return S.srs[k].b>=3}).length;return h+'<div class="card"><h2>All caught up</h2><p class="en">No cards are due. New words appear each day, and cards you rated Good return after 1, 2, 4, 8 days and longer.</p><div class="grid2"><div class="kpi"><b>'+Object.keys(S.srs).length+'</b><span>cards started</span></div><div class="kpi"><b>'+kn+'</b><span>well known</span></div></div></div>'}
+var c=V.Q[0],done=V.total-V.Q.length;
+h+=bar(V.total?done/V.total:0)+'<div class="sub">'+V.Q.length+' left</div><div class="card" style="text-align:center">';
+if(m==="en")h+='<div class="eyebrow">Say it in French</div><div class="fr big">'+esc(c.e)+'</div>';
+else if(m==="fr")h+='<div class="eyebrow">What does it mean?</div><div class="fr big">'+esc(c.f)+'</div><div class="btns" style="justify-content:center">'+hear(c.f)+'</div>';
+else h+='<div class="eyebrow">Listen, then recall</div><div class="btns" style="justify-content:center"><button class="btn" data-a="say" data-t="'+esc(c.f)+'">Play</button><button class="btn ghost" data-a="slow" data-t="'+esc(c.f)+'">Slow</button></div>';
+if(V.show){h+='<hr style="border:0;border-top:1px solid var(--line);margin:16px 0">';
+if(m==="en")h+='<div class="fr big">'+esc(c.f)+'</div>'+(c.p?'<div class="pron">'+esc(c.p)+'</div>':'')+'<div class="btns" style="justify-content:center">'+hear(c.f)+'</div>';
+else if(m==="fr")h+='<div class="fr big">'+esc(c.e)+'</div>'+(c.p?'<div class="pron">'+esc(c.p)+'</div>':'');
+else h+='<div class="fr big">'+esc(c.f)+'</div><div class="en">'+esc(c.e)+'</div>';
+h+='<div class="btns" style="justify-content:center"><button class="btn ghost" data-a="again">Again</button><button class="btn" data-a="good">Good</button></div>'}
+else h+='<div class="btns" style="justify-content:center"><button class="btn" data-a="show">Show answer</button></div>';
+return h+'</div>'}
+
+/* ---------- Practice ---------- */
+function vPractice(){var h=seg([["lt","Listen and type"],["tr","Translate"],["ra","Read aloud"]],V.pm,"pm");
+if(deck().length<3)return h+'<div class="card">Your deck is still small. Check back after a day or two.</div>';
+if(V.pm==="lt")return h+vListen();if(V.pm==="tr")return h+vTrans();return h+vRead()}
+function fin(x,xs){return x.i>=x.l.length}
+function vListen(){var L=V.L;if(!L){L=V.L={l:shuf(deck()).slice(0,8),i:0,s:0,a:null,fin:false}}
+if(L.i>=L.l.length){var hist=S.lt.slice(-5).map(function(r){return r.s+"/"+r.n}).join(", ");return '<div class="card"><h2>Score: '+L.s+' of '+L.l.length+'</h2><p class="en">Recent rounds: '+esc(hist)+'</p><div class="btns"><button class="btn" data-a="lt-again">Another round</button></div></div>'}
+var c=L.l[L.i],h='<div class="card"><div class="eyebrow">Listen and type · '+(L.i+1)+' of '+L.l.length+'</div><div class="btns"><button class="btn" data-a="say" data-t="'+esc(c.f)+'">Play</button><button class="btn ghost" data-a="slow" data-t="'+esc(c.f)+'">Slow</button></div><input type="text" id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Type what you hear"'+(L.a?" disabled value=\""+esc(L.a.v)+"\"":"")+'><p class="sub">Accents are optional.</p>';
+if(L.a)h+='<p class="'+(L.a.ok?"ok":"bad")+'">'+(L.a.ok?"Correct":"Not quite")+'</p><div class="fr">'+esc(c.f)+'</div><div class="en">'+esc(c.e)+'</div><div class="btns"><button class="btn" data-a="lt-next">Next</button></div>';
+else h+='<div class="btns"><button class="btn" data-a="lt-check">Check</button></div>';
+return h+'</div>'}
+function vTrans(){var T=V.T;if(!T){T=V.T={l:shuf(deck()).slice(0,8),i:0,s:0,a:null}}
+if(T.i>=T.l.length){var hist=S.tr.slice(-5).map(function(r){return r.s+"/"+r.n}).join(", ");return '<div class="card"><h2>Score: '+T.s+' of '+T.l.length+'</h2><p class="en">Recent rounds: '+esc(hist)+'</p><div class="btns"><button class="btn" data-a="tr-again">Another round</button></div></div>'}
+var c=T.l[T.i],h='<div class="card"><div class="eyebrow">Translate · '+(T.i+1)+' of '+T.l.length+'</div><div class="fr big">'+esc(c.e)+'</div><input type="text" id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Type it in French"'+(T.a?" disabled value=\""+esc(T.a.v)+"\"":"")+'><p class="sub">Accents are optional.</p>';
+if(T.a)h+='<p class="'+(T.a.ok?"ok":"bad")+'">'+(T.a.ok?"Correct":"Not quite")+'</p><div class="fr">'+esc(c.f)+'</div><div class="btns">'+hear(c.f)+'<button class="btn" data-a="tr-next">Next</button></div>';
+else h+='<div class="btns"><button class="btn" data-a="tr-check">Check</button></div>';
+return h+'</div>'}
+function readLines(){var i=Math.min(V.vd==null?curDay():V.vd,curDay()),dd=dayData(i),a=[];dd.les.d.forEach(function(l){a.push(sp(l))});a.push(dd.phrase);for(var j=1;j<=3&&i-j>=0;j++)a.push(dayData(i-j).phrase);return a}
+function vRead(){var ls=readLines(),n=Object.keys(V.said).length,h='<p class="en">Press play, then say the line right after it. Match the rhythm, not only the words. Tap Said it when you have spoken it aloud.</p>'+bar(n/ls.length)+'<div class="sub">'+n+' of '+ls.length+' said</div>';
+ls.forEach(function(q,k){h+='<div class="w">'+play(q[0])+'<div class="grow"><div class="fr">'+esc(q[0])+'</div><div>'+rv(q[1])+'</div></div><div class="btns" style="margin:0;flex:none"><button class="btn sm '+(V.said[k]?"":"ghost")+'" data-a="said" data-k="'+k+'">'+(V.said[k]?"Said":"Said it")+'</button></div></div>'});
+return h}
+
+/* ---------- Love ---------- */
+function vLove(){var cd=curDay(),h='<h2>Love phrases</h2><p class="en" style="margin-top:6px">Everything you have unlocked, newest first. Use tu with her. A new phrase unlocks every day and they get bolder each week.</p>';
+for(var i=cd;i>=0;i--){var dd=dayData(i),p=dd.phrase;h+='<div class="w" style="align-items:flex-start">'+play(p[0])+'<div class="grow"><div class="eyebrow">Day '+(i+1)+'<span class="lvl">'+lvl(dd.w)+'</span></div><div class="fr">'+esc(p[0])+'</div>'+(p[2]?'<div class="pron">'+esc(p[2])+'</div>':'')+'<div>'+rv(p[1])+'</div><div class="btns"><button class="btn ghost sm love" data-a="slow" data-t="'+esc(p[0])+'">Slow</button><button class="btn ghost sm love" data-a="copy" data-t="'+esc(p[0])+'">Copy</button></div></div></div>'}
+if(cd<N-1)h+='<p class="sub" style="margin-top:12px">Next unlock tomorrow, level: '+lvl(dayData(cd+1).w)+'.</p>';
+return h}
+
+/* ---------- Plan ---------- */
+function vPlan(){var cd=curDay(),tot=0,dn=0;for(var i=0;i<=cd;i++){tot+=tasks(i).length;dn+=cnt(i)}
+var kn=Object.keys(S.srs).filter(function(k){return S.srs[k].b>=3}).length,h='<h2>Your plan</h2>';
+h+='<div class="grid2" style="margin-top:12px"><div class="kpi"><b>'+(dayNum()<0?0:Math.min(dayNum()+1,N))+'<span style="display:inline;font:13px var(--sans)"> / '+N+'</span></b><span>days into Phase 1</span></div><div class="kpi"><b>'+streak()+'</b><span>day streak</span></div><div class="kpi"><b>'+(tot?Math.round(dn/tot*100):0)+'%</b><span>tasks done so far</span></div><div class="kpi"><b>'+kn+'</b><span>well-known cards</span></div></div>';
+h+='<h3>Roadmap to Monte Cristo</h3>';
+PH.forEach(function(p){h+='<div class="phase '+(p.app?"now":"")+'"><b>'+esc(p.n)+'</b> <span class="sub">'+esc(p.m)+'</span><div class="sub">'+esc(p.l)+'</div><div>'+esc(p.g)+'</div>'+(p.app?'<div class="sub"><b>In this app now.</b> Daily plan, cards, practice and love phrases.</div>':'<div class="sub">Ask Claude to add this phase to the app when you get close.</div>')+'</div>'});
+h+='<h3>Checkpoints</h3>';
+CP.forEach(function(c){h+='<label class="task '+(S.cp[c.id]?"on":"")+'"><input type="checkbox" data-a="cp" data-k="'+c.id+'"'+(S.cp[c.id]?" checked":"")+'><span><b>Month '+c.m+':</b> '+esc(c.t)+'<br><span class="sub">Pass mark: '+esc(c.p)+'</span></span></label>'});
+h+='<h3>The goal sentence</h3><div class="card"><p class="en">The first sentence of the novel. Hear it now, and come back at month 14 to read it unaided.</p><div class="fr">'+esc(GOAL.f)+'</div><div class="btns">'+hear(GOAL.f)+'</div><div style="margin-top:8px">'+rv(GOAL.e)+'</div>';
+GOAL.g.forEach(function(g){var q=sp(g);h+='<div class="w">'+play(q[0])+'<div class="grow"><div class="fr">'+esc(q[0])+'</div></div><span class="en" style="max-width:50%;text-align:right">'+esc(q[1])+'</span></div>'});
+h+='</div><h3>Settings</h3><label class="eyebrow" for="startd">Day 1 is</label><input type="date" id="startd" value="'+esc(S.start)+'" style="margin:6px 0 14px">';
+h+='<div class="eyebrow">Voice speed</div>'+seg([["0.9","Normal"],["0.75","Slower"]],String(S.rate),"rate");
+h+='<label class="eyebrow" for="voice">French voice</label>'+(VO.length?'<select id="voice" style="margin:6px 0 14px"><option value="">Automatic</option>'+VO.map(function(v){return '<option value="'+esc(v.name)+'"'+(S.voice===v.name?" selected":"")+'>'+esc(v.name)+' ('+esc(v.lang)+')</option>'}).join("")+'</select>':'<p class="note">No French voice found. On iPhone go to Settings, Accessibility, Spoken Content, Voices, French, and download one. Then reopen this page.</p>');
+h+='<h3>Save and backup</h3><p class="'+(STATUS==="cloud"?"ok":"en")+'">'+(STATUS==="cloud"?"Progress is saved to your Claude account.":"Progress is saved on this device only.")+'</p><p class="sub">A Home Screen icon on iPhone keeps storage separate from Safari, so copy a backup before you switch between them.</p>';
+h+='<div class="btns"><button class="btn ghost sm" data-a="bk">Copy backup</button></div><textarea id="imp" placeholder="Paste a backup here to restore it" style="margin-top:10px"></textarea><div class="btns"><button class="btn ghost sm" data-a="rs">Restore backup</button><button class="btn ghost sm" data-a="reset">'+(V.cr?"Tap again to erase everything":"Reset progress")+'</button></div>';
+return h}
+
+/* ---------- render ---------- */
+var ICON={today:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',cards:'<svg viewBox="0 0 24 24"><rect x="3" y="7" width="14" height="12" rx="2.5"/><path d="M7 4h12a2 2 0 0 1 2 2v9"/></svg>',practice:'<svg viewBox="0 0 24 24"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/></svg>',love:'<svg viewBox="0 0 24 24"><path d="M12 20.5s-7.5-4.6-9.4-9.4A5.2 5.2 0 0 1 12 6.6a5.2 5.2 0 0 1 9.4 4.5C19.5 15.900 12 20.500 12 20.500z"/></svg>',plan:'<svg viewBox="0 0 24 24"><path d="M5 21V4M5 5h12l-2.500 4L17 13H5"/></svg>'};
+function drawTabs(){var n=dueCount(),items=[["today","Today"],["cards","Cards"],["practice","Practice"],["love","Love"],["plan","Plan"]];
+document.getElementById("tabs").innerHTML=items.map(function(x){return '<button class="tab '+(V.tab===x[0]?"on":"")+(x[0]==="love"?" lv":"")+'" data-a="tab" data-v="'+x[0]+'"'+(V.tab===x[0]?' aria-current="page"':'')+'>'+ICON[x[0]]+'<span>'+x[1]+(x[0]==="cards"&&n?'<span class="badge">'+n+'</span>':'')+'</span></button>'}).join("")}
+function render(){var f={today:vToday,cards:vCards,practice:vPractice,love:vLove,plan:vPlan};document.getElementById("view").innerHTML=f[V.tab]();drawTabs();document.getElementById("sDay").textContent=Math.max(1,Math.min(dayNum()+1,N));document.getElementById("sStreak").textContent=streak()}
+
+/* ---------- actions ---------- */
+function act(a,el){var d=el.dataset,cd=curDay();
+switch(a){
+case "tab":V.tab=d.v;V.Q=null;V.L=null;V.T=null;V.said={};V.cr=false;render();window.scrollTo(0,0);break;
+case "say":say(d.t,false);break;
+case "slow":say(d.t,true);break;
+case "copy":copy(d.t);break;
+case "rev":el.classList.toggle("hide");break;
+case "hint":S.hint=1;persist();render();break;
+case "prev":V.vd=Math.max(0,(V.vd==null?cd:V.vd)-1);V.said={};render();window.scrollTo(0,0);break;
+case "next":V.vd=Math.min(cd,(V.vd==null?cd:V.vd)+1);V.said={};render();window.scrollTo(0,0);break;
+case "todayd":V.vd=null;V.said={};render();window.scrollTo(0,0);break;
+case "cm":S.cm=d.v;persist();V.show=false;render();break;
+case "show":V.show=true;render();if(S.cm==="en"&&V.Q[0])say(V.Q[0].f);break;
+case "again":case "good":{var c=V.Q[0],n=dnum(),r=S.srs[c.f]||{b:0,d:n};if(a==="good"){r.b=Math.min(r.b+1,7);r.d=n+IV[r.b-1]}else{r.b=0;r.d=n}S.srs[c.f]=r;V.Q.shift();if(a==="again")V.Q.push(c);V.show=false;persist();if(!V.Q.length&&V.total>0)auto("cards");render();if(S.cm==="au"&&V.Q[0])say(V.Q[0].f);break}
+case "pm":V.pm=d.v;V.said={};render();break;
+case "lt-check":{var L=V.L,c2=L.l[L.i],v=document.getElementById("ans").value,ok=nm(v)===nm(c2.f);if(ok)L.s++;L.a={ok:ok,v:v};render();break}
+case "lt-next":{var L2=V.L;L2.i++;L2.a=null;if(L2.i>=L2.l.length){S.lt.push({d:iso(new Date()),s:L2.s,n:L2.l.length});S.lt=S.lt.slice(-30);persist();auto("listen")}render();if(L2.l[L2.i])say(L2.l[L2.i].f);break}
+case "lt-again":V.L=null;render();break;
+case "tr-check":{var T=V.T,c3=T.l[T.i],v2=document.getElementById("ans").value,ok2=nm(v2)===nm(c3.f);if(ok2)T.s++;T.a={ok:ok2,v:v2};render();break}
+case "tr-next":{var T2=V.T;T2.i++;T2.a=null;if(T2.i>=T2.l.length){S.tr.push({d:iso(new Date()),s:T2.s,n:T2.l.length});S.tr=S.tr.slice(-30);persist();auto("trans")}render();break}
+case "tr-again":V.T=null;render();break;
+case "said":{var k=d.k;if(!V.said[k]){V.said[k]=1;var di=curDay();S.aloud[di]=(S.aloud[di]||0)+1;if(Object.keys(V.said).length>=Math.min(5,readLines().length)){auto("aloud");auto("lesson")}persist()}render();break}
+case "bk":copy(JSON.stringify(S));break;
+case "rs":{try{var o=JSON.parse(document.getElementById("imp").value);if(!o||o.v!==1||!o.start)throw 0;S=Object.assign(def(),o);persist();V.Q=null;V.L=null;V.T=null;toast("Backup restored");render()}catch(e){toast("That backup could not be read")}break}
+case "reset":if(!V.cr){V.cr=true;render()}else{S=def();S.start=iso(new Date());S.hint=1;V.cr=false;V.vd=null;V.Q=null;V.L=null;V.T=null;persist();toast("Progress erased");render()}break;
+case "rate":S.rate=parseFloat(d.v);persist();render();say("Bonjour, je m'appelle Claude.");break;
+}}
+document.addEventListener("click",function(e){var t=e.target.closest("[data-a]");if(!t||t.disabled)return;var a=t.dataset.a;if(a==="task"||a==="cp")return;act(a,t)});
+document.addEventListener("keydown",function(e){var t=e.target;if(e.key==="Enter"&&t.id==="ans"){var b=document.querySelector('[data-a="lt-check"],[data-a="tr-check"]');if(b)b.click()}else if((e.key==="Enter"||e.key===" ")&&t.classList&&t.classList.contains("rv")){e.preventDefault();t.classList.toggle("hide")}});
+document.addEventListener("change",function(e){var t=e.target,a=t.dataset&&t.dataset.a;
+if(a==="task"){var i=+t.dataset.i;S.done[i]=S.done[i]||{};S.done[i][t.dataset.k]=t.checked?1:0;persist();render()}
+else if(a==="cp"){S.cp[t.dataset.k]=t.checked?1:0;persist();render()}
+else if(t.id==="startd"&&t.value){S.start=t.value;V.vd=null;DK=null;persist();render()}
+else if(t.id==="voice"){S.voice=t.value;persist();say("Bonjour, ça va ?")}
+else if(t.id==="win"){var di=+t.dataset.i,w=Math.floor(di/7);S.notes["w"+w]=t.value;S.done[di]=S.done[di]||{};S.done[di].win=t.value.trim()?1:0;persist();render()}});
+render();registerSW();
+})();
+</script>
+</body>
+</html>
